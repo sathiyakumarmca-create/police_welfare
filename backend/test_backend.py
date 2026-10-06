@@ -17,6 +17,13 @@ def setup_db():
     yield
     Base.metadata.drop_all(bind=engine)
 
+def test_backend_root_route_returns_service_status():
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "Police Welfare API"
+
 def test_successful_registration_with_new_fields():
     response = client.post("/api/members/register", json={
         "first_name": "Ramesh",

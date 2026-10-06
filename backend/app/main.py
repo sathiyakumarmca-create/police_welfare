@@ -25,6 +25,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {
+        "status": "healthy",
+        "service": "Police Welfare API",
+        "message": "Backend service is running. Use /api/* endpoints for the app data.",
+        "docs": "/docs",
+        "trust": "காவலர் குடும்ப நல அறக்கட்டளை",
+        "location": "Madurai, Tamil Nadu"
+    }
+
 @app.get("/api/health")
 def health_check():
     return {
