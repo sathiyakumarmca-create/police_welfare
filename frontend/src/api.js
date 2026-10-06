@@ -1,4 +1,24 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Cleanly format API URL for Render deployment and local development.
+// Render injects VITE_API_URL at build time, so keep it strict and fail-safe.
+const LOCAL_API_URL = 'http://localhost:8000/api';
+let rawUrl = (import.meta.env.VITE_API_URL || LOCAL_API_URL).trim();
+
+if (!rawUrl) {
+  rawUrl = LOCAL_API_URL;
+}
+
+if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+  rawUrl = `https://${rawUrl}`;
+}
+
+rawUrl = rawUrl.replace(/\/+$/, '');
+if (!rawUrl.endsWith('/api')) {
+  rawUrl = `${rawUrl}/api`;
+}
+
+const API_BASE_URL = rawUrl;
+
+console.log("Police Welfare API Endpoint:", API_BASE_URL);
 
 export async function registerMember(memberData) {
   try {
@@ -10,9 +30,14 @@ export async function registerMember(memberData) {
       body: JSON.stringify(memberData),
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    let data = {};
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    }
+
     if (!response.ok) {
-      let message = 'Registration failed. Please check your inputs.';
+      let message = `Registration failed (${response.status}).`;
       if (typeof data.detail === 'string') {
         message = data.detail;
       } else if (Array.isArray(data.detail)) {
@@ -31,11 +56,12 @@ export async function registerMember(memberData) {
 export async function fetchMembers() {
   try {
     const response = await fetch(`${API_BASE_URL}/members`);
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error('Failed to fetch members.');
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return data.data || [];
     }
-    return data.data || [];
+    return [];
   } catch (err) {
     console.error("API Fetch Members error:", err);
     return [];
@@ -49,8 +75,11 @@ export async function checkDuplicates(mobile, aadhaar) {
     if (aadhaar) params.append('aadhaar', aadhaar);
 
     const response = await fetch(`${API_BASE_URL}/members/check-duplicate?${params.toString()}`);
-    if (!response.ok) return { mobile_exists: false, aadhaar_exists: false };
-    return await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.includes('application/json')) {
+      return await response.json();
+    }
+    return { mobile_exists: false, aadhaar_exists: false };
   } catch (err) {
     return { mobile_exists: false, aadhaar_exists: false };
   }
