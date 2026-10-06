@@ -2,20 +2,22 @@
 # Police Welfare Application (காவலர் குடும்ப நல அறக்கட்டளை)
 
 services:
-  # Python FastAPI Backend Web Service
+  # Python FastAPI Backend Web Service (Free Tier)
   - type: web
     name: police-welfare-backend
     env: python
+    plan: free
     buildCommand: "cd backend && pip install -r requirements.txt"
     startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
 
-  # React Frontend Static Site
+  # React Frontend Static Site (Free Tier)
   - type: web
     name: police-welfare-frontend
     env: static
+    plan: free
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: "./frontend/dist"
     envVars:
