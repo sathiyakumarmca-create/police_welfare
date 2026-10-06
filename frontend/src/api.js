@@ -1,10 +1,11 @@
 // Cleanly format API URL for Render deployment and local development.
-// Render injects VITE_API_URL at build time, so keep it strict and fail-safe.
 const LOCAL_API_URL = 'http://localhost:8000/api';
-let rawUrl = (import.meta.env.VITE_API_URL || LOCAL_API_URL).trim();
+const DEFAULT_RENDER_BACKEND_URL = 'https://police-welfare-backend.onrender.com/api';
+let rawUrl = (import.meta.env.VITE_API_URL || '').trim();
 
 if (!rawUrl) {
-  rawUrl = LOCAL_API_URL;
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  rawUrl = hostname.includes('render') ? DEFAULT_RENDER_BACKEND_URL : LOCAL_API_URL;
 }
 
 if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
