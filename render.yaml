@@ -28,7 +28,7 @@ services:
         fromService:
           type: web
           name: police-welfare-backend
-          property: url
+          property: host
 
 # Production database for Render; SQLite is not durable on free hosting.
 databases:
