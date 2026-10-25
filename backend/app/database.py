@@ -2,8 +2,9 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Default to SQLite locally, allow override via DATABASE_URL env var for production PostgreSQL/MySQL
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./police_welfare.db")
+# Render PostgreSQL uses 'postgres://' but SQLAlchemy requires 'postgresql://'
+raw_url = os.getenv("DATABASE_URL", "sqlite:///./police_welfare.db")
+SQLALCHEMY_DATABASE_URL = raw_url.replace("postgres://", "postgresql://", 1)
 
 connect_args = {}
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
